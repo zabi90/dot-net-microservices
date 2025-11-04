@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: platforms-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: platformservice # Label selector to identify pods
+  template:
+    metadata:
+      labels:
+        app: platformservice # Labels for the pod
+    spec:
+      containers:
+        - name: platformservice #- means arrays
+          image: zabi90/platformservice:latest

@@ -4,6 +4,7 @@ using PlatformService.AutoMapperProfile;
 using PlatformService.Data;
 using PlatformService.Dtos;
 using PlatformService.Models;
+using PlatformService.SyncDataServices.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseInMemoryDatabase("InMem"));
+builder.Services.AddHttpClient<ICommandDataClient, HttpCommandDataClient>();
 builder.Services.AddScoped<IPlatformRepository, PlatformRepository>();
 builder.Services.AddControllers();
 // Register AutoMapper (scans all profiles in the assembly)
@@ -44,5 +46,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 PrepareDatabase.Prepare(app);
-
+Console.WriteLine("Starting up Platform Service...");
+Console.WriteLine($"CommandService Endpoint {builder.Configuration["CommandService"]}");
 app.Run();
