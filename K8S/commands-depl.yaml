@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: commands-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: commandservice # Label selector to identify pods
+  template:
+    metadata:
+      labels:
+        app: commandservice # Labels for the pod
+    spec:
+      containers:
+        - name: commandservice #- means arrays
+          image: zabi90/commandservice:latest
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: commandservice-clusterip-srv
+spec:
+  type: ClusterIP
+  selector:
+    app: commandservice
+  ports:
+    - name: commandservice
+      protocol: TCP
+      port: 8080
+      targetPort: 8080

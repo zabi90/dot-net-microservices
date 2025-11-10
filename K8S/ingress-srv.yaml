@@ -1,0 +1,27 @@
+#routing file to tell the ingress controller how to route traffic to services
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-srv
+  annotations:
+    kubernetes.io/ingress.class: nginx # Specify the ingress controller
+    nginx.ingress.kubernetes.io/use-regex: "true" # Rewrite rule for paths
+spec:
+  rules:
+    - host: acme.com # Domain name for the ingress
+      http:
+        paths:
+          - path: /api/platforms # Path to match
+            pathType: Prefix
+            backend:
+              service:
+                name: platforms-clusterip-srv # Service to route to
+                port:
+                  number: 8080
+          - path: /api/c/platforms # Path to match
+            pathType: Prefix
+            backend:
+              service:
+                name: commandservice-clusterip-srv # Service to route to
+                port:
+                  number: 8080
