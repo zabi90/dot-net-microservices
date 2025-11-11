@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using PlatformService.AsyncDataServices;
 using PlatformService.AutoMapperProfile;
 using PlatformService.Data;
 using PlatformService.Dtos;
@@ -9,12 +10,26 @@ using PlatformService.SyncDataServices.Http;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-//builder.Services.AddDbContext<AppDbContext>(options =>
-//    options.UseSqlServer(builder.Configuration.GetConnectionString("REDACTED_CONNECTION_STRING_NAME")));
+var connectionString = builder.Configuration.GetConnectionString("PlatformsConn");
+Console.WriteLine($"--> Using SQL Server Db" + connectionString);
+var env = builder.Environment;
+if (env.IsProduction())
+{
+    Console.WriteLine("--> Using Production Db");
+    builder.Services.AddDbContext<AppDbContext>(options =>
+   options.UseSqlServer(connectionString));
 
-builder.Services.AddDbContext<AppDbContext>(options =>
+}else
+{
+    builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseInMemoryDatabase("InMem"));
+}
+
+
+
+
 builder.Services.AddHttpClient<ICommandDataClient, HttpCommandDataClient>();
+builder.Services.AddSingleton<IMessageBusClient, MessageBusClient>();
 builder.Services.AddScoped<IPlatformRepository, PlatformRepository>();
 builder.Services.AddControllers();
 // Register AutoMapper (scans all profiles in the assembly)
@@ -45,7 +60,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-PrepareDatabase.Prepare(app);
+PrepareDatabase.Prepare(app, env.IsProduction());
 Console.WriteLine("Starting up Platform Service...");
 Console.WriteLine($"CommandService Endpoint {builder.Configuration["CommandService"]}");
 app.Run();

@@ -6,16 +6,28 @@ namespace PlatformService.Data
 {
     public static class PrepareDatabase
     {
-        public static void Prepare(IApplicationBuilder application)
+        public static void Prepare(IApplicationBuilder application, bool isProd = false)
         {
             using (var serviceScope = application.ApplicationServices.CreateScope())
             {
-                SeedData(serviceScope.ServiceProvider.GetService<AppDbContext>());
+                SeedData(serviceScope.ServiceProvider.GetService<AppDbContext>(), isProd);
             }
         }
 
-        private static void SeedData(AppDbContext context)
+        private static void SeedData(AppDbContext context, bool isProd)
         {
+            if (isProd)
+            {
+                Console.WriteLine("--> Attempting to apply Migrations...");
+                try
+                {
+                    context.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"--> Could not run migrations: {ex.Message}");
+                }
+            }
 
             if (!context.Platforms.Any())
             {
